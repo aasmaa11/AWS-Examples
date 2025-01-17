@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -e
+
+
+aws sns publish --topic-arn "paste_topic_arn" --message-structure json --message '{"first_name": "Assou","last_name": "Assou"}'

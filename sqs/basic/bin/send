@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+echo "== send"
+
+root_path=$(realpath .)
+message_attributes_pth=${root_path}/send-message.json
+
+
+
+
+
+aws sqs send-message --queue-url paste_queue_url --message-body "Hello mars!" --delay-seconds 10 --message-attributes $message_attributes_pth
