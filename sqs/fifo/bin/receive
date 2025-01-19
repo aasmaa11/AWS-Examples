@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+echo "== receive"
+
+root_path=$(realpath .)
+message_attributes_pth=${root_path}/send-message.json
+
+
+
+
+
+aws sqs receive-message --queue-url paste_queue_url --message-attributes-names All --attribute-names All --max-number-of-messages 10
