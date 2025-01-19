@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -e
+
+root_path=$(realpath .)
+config_path="$(root_path)/samconfig.toml"
+
+
+echo "== SAM deploy..."
+#echo "loading configuration: $config_path"
+same deploy --template-file "./.aws-sam/build/packaged.yml" --stack-name "zip-package-lambda-py" --capabilities "CAPABILITY_IAM" --config-file "$config_path"

@@ -1,0 +1,11 @@
+version=0.1
+[default.package.parameters]
+s3_bucket = "my-lambda-artifacts-ag-1234"
+region = "ca-central-1"
+image_repository="paste_image_uri_here"
+[default.deploy.parameters]
+s3_bucket = "my-lambda-artifacts-ag-1234"
+region = "ca-central-1"
+image_repository="paste_image_uri_here"
+
+
