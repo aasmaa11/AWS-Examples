@@ -1,0 +1,60 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Launch a simple EC2 to test VPCs
+
+Parameters:
+  InstanceType:
+    Type: String
+    Default: t3.micro
+  ImageId:
+    Default: ami....
+  SubnetId:
+    Default: subnetId...
+  VpcId:
+    Default: vpcId...
+  SecurityGroupId:
+    Type: String
+    Default: sgId...
+
+Resources:
+  SSMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam:aws:policy/AmazonSSMManagedInstanceCore
+
+  MyEC2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref SSMRole
+  MyECsInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      IamInstanceProfile: !Ref MyEC2InstanceProfile
+      InstanceType: !Ref InstanceType
+      ImageId: !Ref ImageId
+      #SubnetId: !Ref SubnetId
+      #SecurityGroupIds:
+      #  - !GetAtt SG.GroupId
+      NetworkInterfaces:
+        - DeviceIndex: 0
+          SubnetType: !Ref SubnetId
+          AssociatePublicIpAddress: true
+          #GroupSet:
+          #  - !Ref SecurityGroupId
+          DeleteOnTermination: true
+      UserData:
+        Fn::Base64: |
+          #!/bin/bash
+          sudo apt-get install lsb-release curl gpg
+          curl -fsSL https://packages.redis.io/gpg | sudo gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/redis.list
+          sudo apt-get update
+          sudo apt-get install redis
