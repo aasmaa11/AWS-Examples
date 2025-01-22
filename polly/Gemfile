@@ -1,0 +1,5 @@
+source "https://rubygems.org"
+
+gem "aws-ask-polly"
+gem "pry"
+gem "nokogiri"
