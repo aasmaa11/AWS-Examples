@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+echo "== deploy rds"
+
+STACK_NAME="rds-basic"
+
+aws cloudformation deploy \
+--template-file template.yml \
+--capabilities CAPABILITY_NAMED_IAM \
+--no-execute-changeset \
+--parameter-overrides VpcId="paste-vpc-id" WebServerSGGroupId="paste-sg-id" RdsSecretArn="paste-arn-here" Username="paste-username" Subnets="paste-subnets-separated-with-commas" \
+--region ca-central-1 \
+--stack-name $STACK_NAME
+
