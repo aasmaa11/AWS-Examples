@@ -1,0 +1,105 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Webserver RDS Postgres Instance with Secrets Manager
+
+Parameters:
+  VpcId:
+    Type: String
+  BackupRetentionPeriod:
+    Type: Number
+    Default: 0
+  InstanceClass:
+    Type: String
+    Default: db.t3.micro
+  EngineVersion:
+    Type: String
+    Default: "15.4"
+  PubliclyAccessible:
+    Type: String
+    AllowedValues:
+      - true
+      - false
+    Default: false
+  DeletionProtection:
+    Type: String
+    AllowedValues:
+      - true
+      - false
+    Default: false
+  RdsDatabaseName:
+    Type: String
+  RdsPort:
+    Type: Number
+    Default: 5432
+  Subnets:
+    Type: "List<AWS::EC2::Subnet::Id>"
+    Description: A list of subnets for the auto scaling group
+
+Resources:
+  MySecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      GenerateSecretString:
+        SecretStringTemplate: '{"username": "testuser"}'
+        GenerateStringKey: "password"
+        PasswordLength: 30
+        ExcludeCharacters: '"@/\'
+  DbAttachment:
+    Type: AWS:SecretsManager::SecretTargetAttachment
+    Properties:
+      SecretId: !Ref MySecret
+      TargetId: !Ref RdsInstance
+      TargetType: AWS::RDS::DBInstance
+
+  RdsPostgresSG:
+    Type: AWS::EC2::SecruityGroup
+    Properties:
+      GroupDescription: !Sub "Security Group for ${WebServerStack} RDS Instance"
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: !Ref RdsPort
+          ToPort: !Ref RdsPort
+          CidrIp: 0.0.0.0/0
+      VpcId: !Ref VpcId
+
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: "My DB Subnet Group"
+      SubnetIds: !Ref Subnets
+
+  RdsInstance:
+    Type: AWS::RDS::DBInstance
+    DeletionPolicy: "Delete"
+    UpdateReplicaPolicy: "Delete"
+    Properties:
+      MasterUsername:
+        Fn::Sub: "{{resolve:secretsmanager:${MySecret}::username}}"
+      MasterUserPassword:
+        Fn::Sub: "{{resolve:secretsmanager:${MySecret}::password}}"
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      AllocatedStorage: "20"
+      AllowMajorVersionUpgrade: true
+      AutoMinorVersionUpgrade: true
+      Port: !Ref RdsPort
+      EnableIAMDatabaseAuthentication: false
+      BackupRetentionPeriod: !Ref BackupRetentionPeriod
+      DBInstanceClass: !Ref InstanceClass
+      DBName: !Ref RdsDatabaseName
+      Engine: postgres
+      DeletionProtection: !Ref DeletionProtection
+      EngineVersion: !Ref EngineVersion
+      PubliclyAccessible: !Ref PubliclyAccessible
+      VPCSecurityGroups:
+        - !GetAtt RDSPostgresSG.GroupId
+
+Outputs:
+  StackName:
+    Value: !Ref AWS::StackName
+  RdsPort:
+    Value: !Ref RdsPort
+    Export:
+      Name: !Sub ${AWS::StackName}RdsPort
+  RdsDatabaseName:
+    Value: !Ref RdsDatabaseName
+    Export:
+      Name: !Sub ${AWS::StackName}RdsDatabaseName

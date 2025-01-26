@@ -4,13 +4,14 @@ set -e
 root_path=$(realpath .)
 template_path="$(root_path)/template.yml"
 
-echo "== deploy ddb"
+echo "== deploy sm"
 
-STACK_NAME="aws-sm-basic"
+STACK_NAME="aws-sm-db"
 
 aws cloudformation deploy \
     --template-file "${template_path}" \
     --capabilities CAPABILITY_NAMED_IAM \
     --no-execute-changeset \
+    --parameter-overrides VpcId="paste-vpc-id" Username="paste-username" Subnets="paste-subnets-separated-with-commas" \
     --region ca-central-1 \
     --stack-name $STACK_NAME
