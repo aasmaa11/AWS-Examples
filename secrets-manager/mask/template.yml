@@ -1,0 +1,13 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Launch a simple EC2 to test VPCs
+
+Parameters:
+  MyPassword:
+    Type: String:
+    NoEcho: true
+
+Resources:
+  MySecretPassed:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      SecretString: !Ref MyPassword
