@@ -1,0 +1,16 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Launch a simple EC2 to test VPCs
+
+Resources:
+  MySecretGenerated:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      GenerateSecretString:
+        SecretStringTemplate: '{"username": "test-user"}'
+        GenerateStringKey: "password"
+        PasswordLength: 30
+        ExcludeCharacters: '"@/\'
+  MySecretProvided:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      SecretString: "Testing12345!"
